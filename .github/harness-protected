@@ -1,0 +1,19 @@
+# Paths the harness guard protects: a pull request that changes, renames or deletes one of them fails
+# the "harness-guard" check until a maintainer approves it with the harness-change-approved label.
+#
+# One pattern per line; `*` matches across folders. These files decide what "passing" means or what
+# agents may do, so weakening them would let a change pass on the weakened rules. Add the files your
+# stack's verification depends on (for example `package.json`, if verify.sh calls its scripts).
+# This file is itself protected, and CI always reads the copy on main, never the pull request's.
+
+.github/*
+.claude/settings.json
+.claude/hooks/*
+.claude/agents/*
+.agents/skills/conformance-review/*
+scripts/verify.sh
+scripts/secret-scan.sh
+scripts/harness-guard.sh
+scripts/test/*
+REVIEW.md
+CODING_STANDARDS.md

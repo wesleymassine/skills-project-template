@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# Hook state (files touched per session).
+.claude/state/
+# Conformance review material (diffs, ad-hoc criteria). Agents can't write inside .claude/.
+.review/
+# Personal Claude Code settings.
+.claude/settings.local.json

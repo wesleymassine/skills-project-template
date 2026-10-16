@@ -1,0 +1,8 @@
+# Harness changes go through whoever owns the process. Replace with the GitHub user or team.
+/.agents/skills/   @{{OWNER}}
+/.claude/          @{{OWNER}}
+/scripts/verify.sh @{{OWNER}}
+/REVIEW.md         @{{OWNER}}
+/CODING_STANDARDS.md @{{OWNER}}
+/docs/workflow.md  @{{OWNER}}
+/.github/          @{{OWNER}}

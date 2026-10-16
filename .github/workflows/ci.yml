@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run it makes obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Hooks run on each developer's machine, so their tests run on both systems developers use. A hook
+  # that breaks on macOS's bash 3.2 would otherwise switch its gate off without anyone noticing.
+  harness-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/test/run.sh
+      # A broken workflow only shows up once it reaches GitHub; lint it here first.
+      - run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7
+
+  harness-macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew list jq >/dev/null 2>&1 || brew install jq
+      - run: scripts/test/run.sh
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Only the new commits: the pull request's, or the push's. A first push scans everything.
+      - env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]]; then scripts/secret-scan.sh; else scripts/secret-scan.sh "$BASE..$HEAD"; fi
+
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      # The template repository has no stack to verify; projects created from it do. (hashFiles is
+      # not available in a job-level `if`, so the check is a step.)
+      - id: template
+        run: if [[ -f scripts/init.sh ]]; then echo "skip=true" >>"$GITHUB_OUTPUT"; fi
+      - if: steps.template.outputs.skip != 'true'
+        uses: jdx/mise-action@v2
+      - if: steps.template.outputs.skip != 'true'
+        run: scripts/verify.sh full

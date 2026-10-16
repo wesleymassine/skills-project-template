@@ -1,0 +1,72 @@
+name: Harness guard
+
+# Fails a pull request that changes a protected harness path (.github/harness-protected) until a
+# maintainer approves it with the `harness-change-approved` label. Without it, a pull request (one an
+# agent opened, for instance) could weaken verify.sh or CI and pass on the weakened version.
+#
+# `pull_request_target` runs main's copy of this workflow, of the guard script and of the patterns
+# file. The pull request's code is never checked out or executed here.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: harness-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  harness-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # No `ref`: this checks out the base branch, the trusted copy.
+      - uses: actions/checkout@v4
+
+      - name: Check protected paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+          CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
+          LABEL: harness-change-approved
+        run: |
+          set -euo pipefail
+          if [[ -f scripts/init.sh ]]; then
+            echo "Template repository: the guard runs in projects created from it."
+            exit 0
+          fi
+          # The files API lists at most 3,000 files; beyond that a protected file could hide.
+          if (( CHANGED_FILES >= 3000 )); then
+            echo "::error title=Harness guard::$CHANGED_FILES files changed; the API lists only 3,000. Split the pull request."
+            exit 1
+          fi
+
+          # Old names count too, so renaming a protected file is caught.
+          gh api --paginate "repos/$REPO/pulls/$PR/files" \
+            --jq '.[] | .filename, (.previous_filename // empty)' >"$RUNNER_TEMP/changed"
+          if scripts/harness-guard.sh <"$RUNNER_TEMP/changed"; then exit 0; fi
+
+          # New commits void an earlier approval: the maintainer approves what they reviewed.
+          if [[ "$ACTION" == synchronize ]]; then
+            gh pr edit "$PR" -R "$REPO" --remove-label "$LABEL" >/dev/null 2>&1 || true
+          fi
+
+          if gh api "repos/$REPO/issues/$PR/labels" --jq '.[].name' | grep -qx "$LABEL"; then
+            approver=$(gh api --paginate "repos/$REPO/issues/$PR/events" \
+              --jq ".[] | select(.event == \"labeled\" and .label.name == \"$LABEL\") | .actor.login" | tail -1)
+            role=$(gh api "repos/$REPO/collaborators/$approver/permission" --jq '.role_name')
+            if [[ "$role" == admin || "$role" == maintain ]]; then
+              echo "::notice title=Harness guard::Harness change approved by $approver ($role)."
+              exit 0
+            fi
+            echo "::error title=Harness guard::$LABEL was added by $approver ($role); only admin or maintain roles count."
+          fi
+          echo "::error title=Harness guard::This pull request changes protected harness paths (listed above). A maintainer reviews them and adds the $LABEL label; a new push removes it."
+          exit 1
