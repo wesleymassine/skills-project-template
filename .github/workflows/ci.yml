@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: scripts/test/run.sh
       # A broken workflow only shows up once it reaches GitHub; lint it here first.
       - run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7
@@ -29,7 +29,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: brew list jq >/dev/null 2>&1 || brew install jq
       - run: scripts/test/run.sh
 
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # Only the new commits: the pull request's, or the push's. A first push scans everything.
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The template repository has no stack to verify; projects created from it do. (hashFiles is
       # not available in a job-level `if`, so the check is a step.)
       - id: template
