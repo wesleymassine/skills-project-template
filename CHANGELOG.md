@@ -13,6 +13,7 @@ Projects record the version they were created from in `.template-version`. To br
 ### Added
 
 - **Setup:** `scripts/init.sh` creates a `mise.toml` with no tools and examples, and `make doctor` warns while it is missing, pins no tools, or is not trusted. Without it, local runs used the global mise config and CI the runner's preinstalled tools.
+- **Verification:** `scripts/verify.sh` examples cover Go, Java, Node/TS, Python and Rust, and the `mise.toml` examples match.
 
 ### Fixed
 
