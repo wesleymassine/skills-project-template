@@ -55,7 +55,7 @@ The template has no language or framework. Everything stack-specific goes throug
    Branch protection on private repositories needs a paid GitHub plan; on public ones it's free. `make protect-main` also creates the `harness-change-approved` label used by the harness guard.
 4. **Set up the process:** `make setup-skills`, or type `/setup-matt-pocock-skills` inside your agent. Choose **GitHub Issues** as the issue tracker, so the whole team sees the specs and tickets.
 5. **Describe the problem** in `docs/context.md`, then `make grill` (or `/grill-with-docs` inside the agent). It interviews you, including the engineering questions in `docs/context.md` (security, data, observability, backend, frontend, mobile, test pyramid), and writes `GLOSSARY.md` and the first ADRs in `docs/adr/`.
-6. **Decide the stack** (record it as an ADR), pin it in `mise.toml`, and replace the TODOs in `scripts/verify.sh` with your commands. Until you do, the `verify` CI check fails on purpose.
+6. **Decide the stack** (record it as an ADR), pin it in `mise.toml` (`init.sh` creates it with no tools; run `mise trust` after editing it), and replace the TODOs in `scripts/verify.sh` with your commands. Until you do, the `verify` CI check fails on purpose and `make doctor` warns.
 
 ## Quick start: solo
 
@@ -165,6 +165,7 @@ Matt Pocock's `code-review` skill is left out on purpose: its name collides with
 | An app's rules are ignored in a monorepo | The session was started inside the app folder, or the app has a `CLAUDE.md`. Start from the root; `layout.test.sh` flags stray `CLAUDE.md` files and apps without `AGENTS.md`. |
 | `harness-guard` fails on a pull request | It changes a protected path (`make harness-check` lists them). A maintainer reviews those files and adds the `harness-change-approved` label. Extend `.github/harness-protected` with the files your `verify.sh` depends on. |
 | The `verify` CI check fails on a new project | `scripts/verify.sh full` still has its TODOs. Fill them in once the stack is decided. |
+| `mise install` fails with "not trusted" | A new or changed `mise.toml` must be trusted once per machine: `mise trust`. |
 
 ## Maintaining and contributing
 
