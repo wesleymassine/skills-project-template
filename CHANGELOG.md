@@ -15,6 +15,10 @@ Projects record the version they were created from in `.template-version`. To br
 - **Setup:** `scripts/init.sh` creates a `mise.toml` with no tools and examples, and `make doctor` warns while it is missing, pins no tools, or is not trusted. Without it, local runs used the global mise config and CI the runner's preinstalled tools.
 - **Verification:** `scripts/verify.sh` examples cover Go, Java, Node/TS, Python and Rust, and the `mise.toml` examples match.
 
+### Changed
+
+- **Team:** `make protect-main` now runs `scripts/protect-main.sh`, which creates a repository ruleset instead of classic branch protection. Admins may bypass review and CI through a pull request, so one person can merge a production fix; `docs/workflow.md` has the "Emergency merge" rules. It refuses to run for a non-admin, gives every `CODEOWNERS` team write access, warns about secret teams and CODEOWNERS errors, explains the private-repository plan limit, and removes a classic protection it replaces. Solo projects get the same ruleset without the approval.
+
 ### Fixed
 
 - **Setup:** `make setup` printed "mise not found" when `mise install` failed (for example on an untrusted `mise.toml`).

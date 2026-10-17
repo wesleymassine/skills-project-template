@@ -121,7 +121,7 @@ echo "  1. git add -A && git commit -m 'Initialize from skills-project-template'
 echo "  2. Fill in docs/context.md: the problem and the facts you have already verified."
 echo "  3. make setup-skills, then make grill   (or type /setup-matt-pocock-skills and /grill-with-docs in your agent)"
 echo "  4. Once the stack is decided (ADR): pin it in mise.toml (then mise trust) and fill in scripts/verify.sh."
-[[ -n "$owner" ]] && echo "  5. Push, then make protect-main."
+[[ -n "$owner" ]] && echo "  5. Create the GitHub repository and push (gh repo create <org>/$name --private|--public --source . --push), then make protect-main."
 echo
 echo "Run make to see every command; docs/cheatsheet.md has the commands inside the agent."
 exit 0

@@ -136,13 +136,8 @@ architecture: ## Look for architecture improvements
 
 ##@ Team
 
-protect-main: ## Require PRs, a code-owner review and green CI on main (needs gh)
-	@repo=$$(gh repo view --json nameWithOwner -q .nameWithOwner) && \
-	printf '%s' '{"required_status_checks":{"strict":true,"contexts":["harness-linux","harness-macos","secrets","verify","harness-guard"]},"enforce_admins":true,"required_pull_request_reviews":{"required_approving_review_count":1,"require_code_owner_reviews":true},"restrictions":null}' | \
-	gh api -X PUT "repos/$$repo/branches/main/protection" --input - >/dev/null && \
-	gh label create harness-change-approved -R "$$repo" --color B60205 -f \
-	  --description "A maintainer reviewed this pull request's harness changes" >/dev/null && \
-	echo "main is protected on $$repo; harness changes need the harness-change-approved label"
+protect-main: ## Require PRs and green CI on main; admins may bypass through a PR in emergencies (needs gh)
+	@scripts/protect-main.sh
 
 # >>> template-only (scripts/init.sh removes this block)
 ##@ Template
