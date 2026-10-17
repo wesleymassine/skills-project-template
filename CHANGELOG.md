@@ -8,6 +8,17 @@ All notable changes to this template. The format follows [Keep a Changelog](http
 
 Projects record the version they were created from in `.template-version`. To bring a project up to date, read the entries between that version and the latest one.
 
+## [Unreleased]
+
+### Added
+
+- **Setup:** `scripts/init.sh` creates a `mise.toml` with no tools and examples, and `make doctor` warns while it is missing, pins no tools, or is not trusted. Without it, local runs used the global mise config and CI the runner's preinstalled tools.
+- **Verification:** `scripts/verify.sh` examples cover Go, Java, Node/TS, Python and Rust, and the `mise.toml` examples match.
+
+### Fixed
+
+- **Setup:** `make setup` printed "mise not found" when `mise install` failed (for example on an untrusted `mise.toml`).
+
 ## [0.1.0] - 2026-10-16
 
 First release.

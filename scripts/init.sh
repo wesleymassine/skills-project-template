@@ -72,6 +72,25 @@ template_version=$(tr -d '[:space:]' <TEMPLATE_VERSION)
 } >.template-version
 rm TEMPLATE_VERSION CHANGELOG.md
 
+# The stack is not decided yet, so mise.toml starts with no tools: make doctor warns until one is
+# pinned. Without the file, mise falls back to the developer's global config and CI to the runner's
+# preinstalled tools, so local and CI would run different versions without anyone noticing.
+cat >mise.toml <<'EOF'
+# Tool versions for this project, installed by `make setup` (mise install) and in CI by jdx/mise-action.
+# Pin the stack once it is decided (record the decision as an ADR): uncomment or add lines under
+# [tools] for the language and the tools verify.sh calls (linters, package managers).
+# A new or changed mise.toml must be trusted once per machine: `mise trust`.
+[tools]
+# go = "1.26"
+# golangci-lint = "2"
+# java = "21"
+# node = "22"
+# pnpm = "10"
+# python = "3.13"
+# rust = "1.90"
+# uv = "0.9"
+EOF
+
 # Template-only make targets (init, new-project) have no use in the project.
 sed -i.bak '/^# >>> template-only/,/^# <<< template-only/d' Makefile && rm Makefile.bak
 
@@ -101,7 +120,7 @@ echo "Next steps:"
 echo "  1. git add -A && git commit -m 'Initialize from skills-project-template'   (then: make doctor)"
 echo "  2. Fill in docs/context.md: the problem and the facts you have already verified."
 echo "  3. make setup-skills, then make grill   (or type /setup-matt-pocock-skills and /grill-with-docs in your agent)"
-echo "  4. Once the stack is decided (ADR): pin it in mise.toml and fill in scripts/verify.sh."
+echo "  4. Once the stack is decided (ADR): pin it in mise.toml (then mise trust) and fill in scripts/verify.sh."
 [[ -n "$owner" ]] && echo "  5. Push, then make protect-main."
 echo
 echo "Run make to see every command; docs/cheatsheet.md has the commands inside the agent."

@@ -35,11 +35,19 @@ doctor: ## Check that this machine has everything the project needs
 	if command -v $(CLAUDE) >/dev/null && $(CLAUDE) plugin list 2>/dev/null | grep -q 'mattpocock-skills@'; then \
 	  printf "  info  mattpocock-skills plugin is installed; this project turns it off (see make plugins)\n"; fi; \
 	if [[ -f .template-version ]]; then printf "  ok    created from template v%s\n" "$$(awk '/^version:/{print $$2}' .template-version)"; fi; \
+	if [[ ! -f scripts/init.sh ]]; then \
+	  if [[ ! -f mise.toml ]]; then printf "  warn  no mise.toml: tools come from your global mise config locally and from the runner in CI\n"; \
+	  elif ! awk '/^\[/{t=($$0=="[tools]")} t && /^[[:space:]]*[^#[:space:][]/{f=1} END{exit !f}' mise.toml; then \
+	    printf "  warn  mise.toml pins no tools yet: pin the stack once it is decided (ADR)\n"; \
+	  elif command -v mise >/dev/null && ! mise ls --local >/dev/null 2>&1; then printf "  warn  mise can't read mise.toml (not trusted? run mise trust)\n"; \
+	  else printf "  ok    mise.toml pins the stack\n"; fi; \
+	fi; \
 	scripts/test/layout.test.sh >/dev/null && printf "  ok    skill layout\n" || { printf "  MISS  skill layout (run make skills-check)\n"; ok=0; }; \
 	[[ $$ok == 1 ]] && printf "\nReady.\n" || { printf "\nFix the MISS lines above.\n"; exit 1; }
 
 setup: ## Install the pinned tool versions and check the machine
-	@command -v mise >/dev/null && mise install || echo "mise not found: install it from https://mise.jdx.dev"
+	@if ! command -v mise >/dev/null; then echo "mise not found: install it from https://mise.jdx.dev"; \
+	elif ! mise install; then echo "mise install failed (a new or changed mise.toml needs mise trust first)"; fi
 	@$(MAKE) --no-print-directory doctor
 
 ##@ Verify
