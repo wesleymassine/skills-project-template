@@ -41,18 +41,12 @@ The template has no language or framework. Everything stack-specific goes throug
    make setup
    ```
    This fills in the placeholders, sets up `CODEOWNERS`, replaces this README with one for your project and removes the template's own files.
-3. **Protect `main`**, so changes only land through a reviewed pull request with green CI: `make protect-main`. It runs:
-   ```bash
-   gh api -X PUT repos/your-org/your-project/branches/main/protection --input - <<'EOF'
-   {
-     "required_status_checks": { "strict": true, "contexts": ["harness-linux", "harness-macos", "secrets", "verify", "harness-guard"] },
-     "enforce_admins": true,
-     "required_pull_request_reviews": { "required_approving_review_count": 1, "require_code_owner_reviews": true },
-     "restrictions": null
-   }
-   EOF
-   ```
-   Branch protection on private repositories needs a paid GitHub plan; on public ones it's free. `make protect-main` also creates the `harness-change-approved` label used by the harness guard.
+3. **Protect `main`**, so changes only land through a pull request with green CI: `make protect-main` (`scripts/protect-main.sh`). Run it as a repository admin; whoever creates the repository is one. It creates a repository ruleset on the default branch:
+   - pull request required, all CI checks green (`harness-linux`, `harness-macos`, `secrets`, `verify`, `harness-guard`), no force push or deletion;
+   - in a team project, one approval from a code owner, and every team in `CODEOWNERS` gets write access (GitHub ignores owners without it; it also ignores secret teams, and the script tells you how to make one visible);
+   - **admins may bypass, but only through a pull request**, so at least one person can merge a production fix without waiting for review or CI, and the bypass stays on record. When that is allowed: `docs/workflow.md`, "Emergency merge".
+
+   It also creates the `harness-change-approved` label and lists the admins. Rulesets on private repositories need a paid GitHub plan; on public ones they're free.
 4. **Set up the process:** `make setup-skills`, or type `/setup-matt-pocock-skills` inside your agent. Choose **GitHub Issues** as the issue tracker, so the whole team sees the specs and tickets.
 5. **Describe the problem** in `docs/context.md`, then `make grill` (or `/grill-with-docs` inside the agent). It interviews you, including the engineering questions in `docs/context.md` (security, data, observability, backend, frontend, mobile, test pyramid), and writes `GLOSSARY.md` and the first ADRs in `docs/adr/`.
 6. **Decide the stack** (record it as an ADR), pin it in `mise.toml` (`init.sh` creates it with no tools; run `mise trust` after editing it), and replace the TODOs in `scripts/verify.sh` with your commands. Until you do, the `verify` CI check fails on purpose and `make doctor` warns.

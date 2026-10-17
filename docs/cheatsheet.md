@@ -24,7 +24,7 @@ make grill          # start aligning on the first feature
 | `make review T=<ticket>` | conformance review of the current branch |
 | `make grill TOPIC="..."`, `make tickets SPEC=<spec>` | align on a feature, split a spec into tickets |
 | `make retro`, `make triage`, `make architecture` | improve the harness, triage incoming issues, look for architecture fixes |
-| `make protect-main` | team: PRs, a code-owner review and green CI required on `main` |
+| `make protect-main` | PRs and green CI required on `main` (team: plus a code-owner review); admins may bypass through a PR in an emergency |
 
 Skill management:
 

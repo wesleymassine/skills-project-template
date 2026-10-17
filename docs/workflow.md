@@ -42,12 +42,20 @@ The harness gets better from real failures, not from guesses:
 ## Working as a team
 
 - **Tickets live in GitHub Issues**, not in `.scratch/`: choose that in `/setup-matt-pocock-skills`. Local files are only for solo work.
-- **One branch and one pull request per ticket.** `main` is protected: changes land only through a PR with green CI.
+- **One branch and one pull request per ticket.** `main` is protected: changes land only through a PR with green CI (admins can bypass in an emergency, see below).
 - **CI is the guarantee, not the hooks.** Hooks help whoever uses Claude Code; CI runs `scripts/verify.sh full` for everyone, with or without an agent.
 - **Pull requests follow `.github/pull_request_template.md`**: ticket, summary, evidence, merge danger, verification and unfixed review findings. The `pr` skill writes it in that shape.
 - **What is shared goes in git; what is personal does not.** Personal settings go in `.claude/settings.local.json` (ignored); personal instructions go in your user-level file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`).
 - **Never add a `CLAUDE.md` or `CLAUDE.local.md` to the project.** When either exists, Claude Code stops reading `AGENTS.md`. If one is unavoidable, its first line must be `@AGENTS.md`.
 - **Harness changes are approved on purpose.** `CODEOWNERS` asks the owner for a review, and the harness guard fails the pull request until a maintainer adds the `harness-change-approved` label. `make harness-check` shows what a branch touches before you open it. Agents are denied adding that label.
+
+## Emergency merge
+
+`make protect-main` lets repository admins bypass review and CI, only through a pull request. Keep at least one admin per repository (the creator by default; two is safer).
+
+- **Only for a production incident** whose fix cannot wait for review or CI. Never to skip a failing check on ordinary work.
+- **Still a pull request**, with `[emergency]` in the title and the incident in the body. The bypass is recorded on it.
+- **Afterwards**, within one working day: a teammate reviews the merged change, CI is green on `main`, and anything skipped (tests, harness approval) gets its own ticket.
 
 ## Session hygiene (token cost)
 
