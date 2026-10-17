@@ -77,14 +77,18 @@ rm TEMPLATE_VERSION CHANGELOG.md
 # preinstalled tools, so local and CI would run different versions without anyone noticing.
 cat >mise.toml <<'EOF'
 # Tool versions for this project, installed by `make setup` (mise install) and in CI by jdx/mise-action.
-# Pin the stack here once it is decided (record the decision as an ADR): the language and the tools
-# verify.sh calls (linters, package managers). One line per tool, for example:
-#
-#   go = "1.26"        java = "21"        node = "22"        python = "3.13"        rust = "1.90"
-#   golangci-lint = "2"                   pnpm = "10"        uv = "0.9"
-#
+# Pin the stack once it is decided (record the decision as an ADR): uncomment or add lines under
+# [tools] for the language and the tools verify.sh calls (linters, package managers).
 # A new or changed mise.toml must be trusted once per machine: `mise trust`.
 [tools]
+# go = "1.26"
+# golangci-lint = "2"
+# java = "21"
+# node = "22"
+# pnpm = "10"
+# python = "3.13"
+# rust = "1.90"
+# uv = "0.9"
 EOF
 
 # Template-only make targets (init, new-project) have no use in the project.
